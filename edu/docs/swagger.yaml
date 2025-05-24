@@ -1,0 +1,735 @@
+basePath: /api/v1
+definitions:
+  handler.PurchaseCourseRequest:
+    properties:
+      course_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    required:
+    - course_id
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Course:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: string
+      level:
+        type: string
+      price:
+        type: number
+      rating:
+        type: number
+      status:
+        type: string
+      students_count:
+        type: integer
+      thumbnail:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CourseProgress:
+    properties:
+      completed_at:
+        type: string
+      completed_lessons:
+        type: integer
+      course_id:
+        type: string
+      percentage:
+        type: number
+      total_lessons:
+        type: integer
+      xp_earned:
+        type: integer
+    type: object
+  models.CourseStructure:
+    properties:
+      completed_lessons:
+        type: integer
+      course:
+        allOf:
+        - $ref: '#/definitions/models.Course'
+        description: Основная информация о курсе
+      lessons:
+        description: Список уроков курса
+        items:
+          $ref: '#/definitions/models.Lesson'
+        type: array
+      progress:
+        type: number
+      total_lessons:
+        description: Статистика прогресса
+        type: integer
+    type: object
+  models.Lesson:
+    properties:
+      completed:
+        description: Поля для отображения прогресса
+        type: boolean
+      content:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      has_test:
+        type: boolean
+      id:
+        type: string
+      order_num:
+        type: integer
+      passed_test:
+        type: boolean
+      requires_test:
+        type: boolean
+      test_score:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+      viewed_at:
+        type: string
+    type: object
+  models.Question:
+    properties:
+      correct_answer:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      options:
+        items:
+          type: string
+        type: array
+      question_text:
+        type: string
+      test_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Test:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      lesson_id:
+        type: string
+      passing_score:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.TestResponse:
+    properties:
+      attempts_count:
+        type: integer
+      last_score:
+        description: Информация о прогрессе
+        type: integer
+      passed:
+        type: boolean
+      passing_score:
+        description: Проходной балл
+        type: integer
+      questions:
+        description: Вопросы теста (без правильных ответов)
+        items:
+          $ref: '#/definitions/models.Question'
+        type: array
+      test:
+        allOf:
+        - $ref: '#/definitions/models.Test'
+        description: Основная информация о тесте
+    type: object
+  models.UserProfile:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      role:
+        type: string
+      settings:
+        additionalProperties: true
+        type: object
+      total_xp:
+        type: integer
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: |-
+    API для образовательной платформы с курсами, тестами и системой прогресса обучения
+    Включает функционал для студентов (просмотр и покупка курсов, прохождение уроков и тестов),
+    администраторов (управление курсами и модерация) и общедоступные эндпоинты (категории, публичная информация о курсах).
+  title: Образовательная платформа API
+  version: "1.0"
+paths:
+  /admin/courses:
+    post:
+      consumes:
+      - application/json
+      description: Создать новый курс
+      parameters:
+      - description: Данные курса
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Course'
+      security:
+      - BearerAuth: []
+      summary: Создать курс
+      tags:
+      - admin
+  /admin/courses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить существующий курс
+      parameters:
+      - description: ID курса
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Удалить курс
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Обновить существующий курс
+      parameters:
+      - description: ID курса
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные курса
+        in: body
+        name: course
+        required: true
+        schema:
+          $ref: '#/definitions/models.Course'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+      security:
+      - BearerAuth: []
+      summary: Обновить курс
+      tags:
+      - admin
+  /admin/courses/{id}/approve:
+    post:
+      consumes:
+      - application/json
+      description: Одобрить курс для публикации
+      parameters:
+      - description: ID курса
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Одобрить курс
+      tags:
+      - admin
+  /admin/courses/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Отклонить курс с указанием причины
+      parameters:
+      - description: ID курса
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Причина отклонения
+        in: body
+        name: reason
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Отклонить курс
+      tags:
+      - admin
+  /admin/courses/pending:
+    get:
+      consumes:
+      - application/json
+      description: Получить список курсов, ожидающих модерации
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Количество элементов на странице
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Course'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Список ожидающих модерации курсов
+      tags:
+      - admin
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Получить список всех категорий курсов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+      summary: Список категорий
+      tags:
+      - categories
+  /courses:
+    get:
+      consumes:
+      - application/json
+      description: Получить список всех курсов
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Количество элементов на странице
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Course'
+            type: array
+      summary: Список курсов
+      tags:
+      - courses
+  /courses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получить информацию о курсе по ID
+      parameters:
+      - description: ID курса
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+      summary: Получить курс
+      tags:
+      - courses
+  /courses/category/{categoryId}:
+    get:
+      consumes:
+      - application/json
+      description: Получить список курсов в указанной категории
+      parameters:
+      - description: ID категории
+        in: path
+        name: categoryId
+        required: true
+        type: string
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Количество элементов на странице
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Course'
+            type: array
+      summary: Список курсов по категории
+      tags:
+      - courses
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Получить профиль текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+      security:
+      - BearerAuth: []
+      summary: Получить профиль
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: Обновить профиль текущего пользователя
+      parameters:
+      - description: Данные профиля
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+      security:
+      - BearerAuth: []
+      summary: Обновить профиль
+      tags:
+      - profile
+  /profile/courses:
+    get:
+      consumes:
+      - application/json
+      description: Получить список купленных курсов текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Course'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Получить купленные курсы
+      tags:
+      - profile
+  /profile/xp:
+    get:
+      consumes:
+      - application/json
+      description: Получить общее количество XP текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить общий XP
+      tags:
+      - profile
+  /progress/courses/{courseId}:
+    get:
+      consumes:
+      - application/json
+      description: Получить прогресс пользователя по конкретному курсу
+      parameters:
+      - description: ID курса
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CourseProgress'
+      security:
+      - BearerAuth: []
+      summary: Получить прогресс по курсу
+      tags:
+      - progress
+  /progress/lessons/{lessonId}/test:
+    post:
+      consumes:
+      - application/json
+      description: Отправить ответы на тест и получить результат
+      parameters:
+      - description: ID урока
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Ответы на вопросы
+        in: body
+        name: answers
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Отправить ответы на тест
+      tags:
+      - progress
+  /progress/lessons/{lessonId}/view:
+    post:
+      consumes:
+      - application/json
+      description: Отметить урок как просмотренный и начислить XP
+      parameters:
+      - description: ID урока
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Отметить урок как просмотренный
+      tags:
+      - progress
+  /student/courses/{courseId}/lessons:
+    get:
+      consumes:
+      - application/json
+      description: Получить список уроков для конкретного курса
+      parameters:
+      - description: ID курса
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Lesson'
+            type: array
+      summary: Получить уроки курса
+      tags:
+      - courses
+  /student/courses/{courseId}/structure:
+    get:
+      consumes:
+      - application/json
+      description: Получить полную структуру курса с уроками и прогрессом для купленного
+        курса
+      parameters:
+      - description: ID курса
+        in: path
+        name: courseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CourseStructure'
+      security:
+      - BearerAuth: []
+      summary: Получить структуру курса
+      tags:
+      - courses
+  /student/courses/purchase:
+    post:
+      consumes:
+      - application/json
+      description: Покупка курса пользователем
+      parameters:
+      - description: Данные для покупки курса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PurchaseCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Купить курс
+      tags:
+      - courses
+  /student/lessons/{lessonId}:
+    get:
+      consumes:
+      - application/json
+      description: Получить содержимое конкретного урока
+      parameters:
+      - description: ID урока
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Lesson'
+      summary: Получить урок
+      tags:
+      - lessons
+  /student/lessons/{lessonId}/test:
+    get:
+      consumes:
+      - application/json
+      description: Получить тест, привязанный к уроку (если есть)
+      parameters:
+      - description: ID урока
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TestResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить тест урока
+      tags:
+      - lessons
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

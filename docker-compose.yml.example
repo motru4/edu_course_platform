@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: eduplatform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  goose:
+    build:
+      context: .
+      dockerfile: migrations/Dockerfile.goose
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    working_dir: /migrations
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "postgres://postgres:password@db:5432/eduplatform?sslmode=disable"
+    command: ["up"]
+
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    env_file:
+      - auth/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      goose:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    environment:
+      DB_URL: postgres://postgres:password@db:5432/eduplatform?sslmode=disable
+
+  edu-service:
+    build:
+      context: ./edu
+      dockerfile: Dockerfile
+    env_file:
+      - edu/.env
+    depends_on:
+      auth-service:
+        condition: service_started
+    ports:
+      - "8081:8081"
+      - "9091:9091"
+    environment:
+      AUTH_SERVICE_URL: "auth-service:9090"
+      DB_URL: postgres://postgres:password@db:5432/eduplatform?sslmode=disable
+
+volumes:
+  pgdata:

@@ -1,0 +1,327 @@
+basePath: /api/v1
+definitions:
+  models.PasswordResetConfirm:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      new_password:
+        type: string
+    required:
+    - code
+    - email
+    - new_password
+    type: object
+  models.PasswordResetRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  models.RefreshInput:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  models.TokenPair:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.UserCreate:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.UserLogin:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.VerificationRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Сервис аутентификации и авторизации
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные и отправляет код подтверждения на email
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Код подтверждения отправлен
+          schema:
+            type: string
+        "400":
+          description: Некорректные входные данные
+          schema:
+            type: string
+        "401":
+          description: Неверные учетные данные
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /oauth/google:
+    get:
+      consumes:
+      - application/json
+      description: Выполняет OAuth 2.0 авторизацию через Google
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токены доступа
+          schema:
+            $ref: '#/definitions/models.TokenPair'
+        "501":
+          description: Функционал не реализован
+          schema:
+            type: string
+      summary: OAuth авторизация через Google
+      tags:
+      - auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет access token с помощью refresh token
+      parameters:
+      - description: Refresh токен
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.RefreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Новая пара токенов
+          schema:
+            $ref: '#/definitions/models.TokenPair'
+        "400":
+          description: Некорректные входные данные
+          schema:
+            type: string
+        "401":
+          description: Невалидный refresh token
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Обновление токена доступа
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя и отправляет код подтверждения на email
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Код подтверждения отправлен
+          schema:
+            type: string
+        "400":
+          description: Некорректные входные данные
+          schema:
+            type: string
+        "409":
+          description: Email уже существует
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
+  /reset-password/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Сбрасывает пароль с помощью кода подтверждения
+      parameters:
+      - description: Данные для сброса пароля
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.PasswordResetConfirm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пароль успешно изменен
+          schema:
+            type: string
+        "400":
+          description: Некорректные входные данные
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Подтверждение сброса пароля
+      tags:
+      - auth
+  /reset-password/request:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет код подтверждения на email для сброса пароля
+      parameters:
+      - description: Email пользователя
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Код подтверждения отправлен
+          schema:
+            type: string
+        "400":
+          description: Некорректные входные данные
+          schema:
+            type: string
+        "404":
+          description: Пользователь не найден
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Запрос на сброс пароля
+      tags:
+      - auth
+  /verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Подтверждает email с помощью кода подтверждения
+      parameters:
+      - description: Код подтверждения
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токены доступа
+          schema:
+            $ref: '#/definitions/models.TokenPair'
+        "400":
+          description: Некорректный код
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Подтверждение email при регистрации
+      tags:
+      - auth
+  /verify-login:
+    post:
+      consumes:
+      - application/json
+      description: Подтверждает вход с помощью кода подтверждения
+      parameters:
+      - description: Код подтверждения
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токены доступа
+          schema:
+            $ref: '#/definitions/models.TokenPair'
+        "400":
+          description: Некорректный код
+          schema:
+            type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            type: string
+      summary: Подтверждение входа
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
