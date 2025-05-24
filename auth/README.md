@@ -68,15 +68,15 @@ make run
 
 ### HTTP API (8080)
 
-- `POST /api/v1/register` - User registration
-- `POST /api/v1/login` - Authentication
-- `POST /api/v1/verify-email` - Email verification for registration
-- `POST /api/v1/verify-login` - 2FA verification for login
-- `POST /api/v1/refresh` - Refresh token pair
-- `POST /api/v1/reset-password/request` - Request password reset
-- `POST /api/v1/reset-password/confirm` - Confirm password reset
-- `GET /api/v1/oauth/google` - OAuth 2.0 via Google
-- `GET /api/v1/swagger/*` - API documentation
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/login` - Authentication
+- `POST /api/v1/auth/verify-email` - Email verification for registration
+- `POST /api/v1/auth/verify-login` - 2FA verification for login
+- `POST /api/v1/auth/refresh` - Refresh token pair
+- `POST /api/v1/auth/reset-password/request` - Request password reset
+- `POST /api/v1/auth/reset-password/confirm` - Confirm password reset
+- `GET /api/v1/auth/oauth/google` - OAuth 2.0 via Google
+- `GET /api/v1/auth/swagger/*` - API documentation
 
 ### gRPC API (9090)
 
