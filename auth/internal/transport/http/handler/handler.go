@@ -31,7 +31,7 @@ func NewHandler(router *gin.Engine, authService *services.AuthService, cfg *conf
 	rateLimiter := middleware.NewRateLimiter(cfg.RateLimit)
 
 	// Public routes
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/api/v1/auth")
 	{
 		v1.POST("/register", rateLimiter.RateLimit(), h.register)
 		v1.POST("/login", rateLimiter.RateLimit(), h.login)

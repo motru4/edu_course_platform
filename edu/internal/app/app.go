@@ -121,7 +121,7 @@ func New() (*App, error) {
 	handler.NewCategoryHandler(a.router, categoryService)
 
 	// Настройка Swagger
-	a.router.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	a.router.GET("/api/v1/edu/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Настройка HTTP сервера
 	a.httpServer = &http.Server{

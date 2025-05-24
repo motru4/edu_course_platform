@@ -30,7 +30,7 @@ type App struct {
 // @version 1.0
 // @description Сервис аутентификации и авторизации
 // @host localhost:8080
-// @BasePath /api/v1
+// @BasePath /api/v1/auth
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

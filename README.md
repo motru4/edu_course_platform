@@ -66,8 +66,8 @@ Database migrations are located in the `/migrations` directory. Goose is used fo
 
 ## API Documentation
 
-- Auth Service Swagger: `http://localhost:[auth-port]/swagger/index.html`
-- Edu Service Swagger: `http://localhost:[edu-port]/swagger/index.html`
+- Auth Service Swagger: `http://localhost:[auth-port]/api/v1/auth/swagger/index.html`
+- Edu Service Swagger: `http://localhost:[edu-port]/api/v1/edu/swagger/index.html`
 
 ## Project Structure
 
