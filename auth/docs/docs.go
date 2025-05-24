@@ -467,9 +467,6 @@ const docTemplate = `{
                 "password"
             ],
             "properties": {
-                "code": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },

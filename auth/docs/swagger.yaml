@@ -47,8 +47,6 @@ definitions:
     type: object
   models.UserLogin:
     properties:
-      code:
-        type: string
       email:
         type: string
       password:
