@@ -124,3 +124,18 @@ func (r *UserRepository) UpdatePassword(userID uuid.UUID, hashedPassword string)
 	_, err := r.db.Exec(query, hashedPassword, userID)
 	return err
 }
+
+func (r *UserRepository) Update(user *models.User) error {
+	_, err := r.db.Exec(`
+		UPDATE users 
+		SET password_hash = $1, 
+			password_changed_at = $2
+		WHERE id = $3
+	`, user.PasswordHash, user.PasswordChangedAt, user.ID)
+
+	if err != nil {
+		return fmt.Errorf("error updating user: %w", err)
+	}
+
+	return nil
+}

@@ -85,7 +85,36 @@ func (s *AuthService) Register(input *models.UserCreate) (*models.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error checking email existence: %w", err)
 	}
+
 	if exists {
+		// Проверяем, подтверждена ли почта существующего пользователя
+		existingUser, err := s.userRepo.GetByEmail(input.Email)
+		if err != nil {
+			return nil, fmt.Errorf("error getting user by email: %w", err)
+		}
+
+		// Если почта не подтверждена, обновляем пароль и отправляем новый код
+		if !existingUser.Confirmed {
+			hashedPassword, err := s.passwordHasher.Hash(input.Password)
+			if err != nil {
+				return nil, fmt.Errorf("error hashing password: %w", err)
+			}
+
+			existingUser.PasswordHash = hashedPassword
+			existingUser.PasswordChangedAt = time.Now()
+
+			if err := s.userRepo.Update(existingUser); err != nil {
+				return nil, fmt.Errorf("error updating user: %w", err)
+			}
+
+			// Отправляем новый код подтверждения
+			if err := s.sendVerificationCode(existingUser.ID, existingUser.Email, models.VerificationTypeRegistration); err != nil {
+				return nil, fmt.Errorf("error sending verification code: %w", err)
+			}
+
+			return existingUser, nil
+		}
+
 		return nil, ErrEmailExists
 	}
 
