@@ -84,7 +84,7 @@ func New() (*Config, error) {
 			GoogleClientSecret: os.Getenv("GOOGLE_SECRET"),
 		},
 		RateLimit: RateLimitConfig{
-			Requests: 5,
+			Requests: 50,
 			Period:   time.Minute,
 		},
 		Security: SecurityConfig{

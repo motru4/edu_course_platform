@@ -65,7 +65,7 @@ definitions:
     - code
     - email
     type: object
-host: localhost:8080
+host: localhost:8090
 info:
   contact: {}
   description: Сервис аутентификации и авторизации
