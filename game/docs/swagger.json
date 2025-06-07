@@ -1,0 +1,332 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для игровой платформы с мини-играми и таблицами лидеров\nВключает функционал для игры-кликера, отслеживания статистики и просмотра таблицы лидеров",
+        "title": "Игровая платформа API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8090",
+    "basePath": "/api/v1/game",
+    "paths": {
+        "/clicker/clicks": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Сохраняет количество кликов пользователя и обновляет его статистику",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Сохранить клики пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные о кликах",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ClickRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ClickResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clicker/leaderboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает таблицу лидеров игры-кликера",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Получить таблицу лидеров",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Лимит записей (по умолчанию 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Смещение (по умолчанию 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LeaderboardResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clicker/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает статистику пользователя в игре-кликере",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Получить статистику пользователя",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.StatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ClickRequest": {
+            "type": "object",
+            "required": [
+                "click_count",
+                "client_timestamp",
+                "session_time"
+            ],
+            "properties": {
+                "click_count": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "client_timestamp": {
+                    "type": "integer"
+                },
+                "session_time": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        "models.ClickResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                },
+                "total_clicks": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ClickerSession": {
+            "type": "object",
+            "properties": {
+                "average_cps": {
+                    "type": "number"
+                },
+                "click_count": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "max_cps": {
+                    "type": "number"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ClickerStats": {
+            "type": "object",
+            "properties": {
+                "clicks_per_second": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_click_time": {
+                    "type": "string"
+                },
+                "last_save_count": {
+                    "type": "integer"
+                },
+                "last_save_time": {
+                    "type": "string"
+                },
+                "total_clicks": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LeaderboardEntry": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LeaderboardResponse": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.LeaderboardEntry"
+                    }
+                },
+                "user_rank": {
+                    "$ref": "#/definitions/models.LeaderboardEntry"
+                }
+            }
+        },
+        "models.StatsResponse": {
+            "type": "object",
+            "properties": {
+                "recent_sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ClickerSession"
+                    }
+                },
+                "stats": {
+                    "$ref": "#/definitions/models.ClickerStats"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

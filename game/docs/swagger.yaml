@@ -1,0 +1,217 @@
+basePath: /api/v1/game
+definitions:
+  models.ClickRequest:
+    properties:
+      click_count:
+        minimum: 1
+        type: integer
+      client_timestamp:
+        type: integer
+      session_time:
+        minimum: 0
+        type: number
+    required:
+    - click_count
+    - client_timestamp
+    - session_time
+    type: object
+  models.ClickResponse:
+    properties:
+      status:
+        type: string
+      total_clicks:
+        type: integer
+    type: object
+  models.ClickerSession:
+    properties:
+      average_cps:
+        type: number
+      click_count:
+        type: integer
+      created_at:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      max_cps:
+        type: number
+      start_time:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.ClickerStats:
+    properties:
+      clicks_per_second:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      last_click_time:
+        type: string
+      last_save_count:
+        type: integer
+      last_save_time:
+        type: string
+      total_clicks:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.LeaderboardEntry:
+    properties:
+      id:
+        type: string
+      rank:
+        type: integer
+      score:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  models.LeaderboardResponse:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/models.LeaderboardEntry'
+        type: array
+      user_rank:
+        $ref: '#/definitions/models.LeaderboardEntry'
+    type: object
+  models.StatsResponse:
+    properties:
+      recent_sessions:
+        items:
+          $ref: '#/definitions/models.ClickerSession'
+        type: array
+      stats:
+        $ref: '#/definitions/models.ClickerStats'
+    type: object
+host: localhost:8090
+info:
+  contact: {}
+  description: |-
+    API для игровой платформы с мини-играми и таблицами лидеров
+    Включает функционал для игры-кликера, отслеживания статистики и просмотра таблицы лидеров
+  title: Игровая платформа API
+  version: "1.0"
+paths:
+  /clicker/clicks:
+    post:
+      consumes:
+      - application/json
+      description: Сохраняет количество кликов пользователя и обновляет его статистику
+      parameters:
+      - description: Данные о кликах
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ClickRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ClickResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Сохранить клики пользователя
+      tags:
+      - game
+  /clicker/leaderboard:
+    get:
+      description: Возвращает таблицу лидеров игры-кликера
+      parameters:
+      - description: Лимит записей (по умолчанию 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение (по умолчанию 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaderboardResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить таблицу лидеров
+      tags:
+      - game
+  /clicker/stats:
+    get:
+      description: Возвращает статистику пользователя в игре-кликере
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить статистику пользователя
+      tags:
+      - game
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
