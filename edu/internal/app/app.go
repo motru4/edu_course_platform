@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -25,8 +24,7 @@ import (
 
 type App struct {
 	cfg        *config.Config
-	router     *gin.Engine
-	httpServer *http.Server
+	httpServer *gin.Engine
 	grpcConn   *grpc.ClientConn
 }
 
@@ -35,8 +33,8 @@ type App struct {
 // @description API для образовательной платформы с курсами, тестами и системой прогресса обучения
 // @description Включает функционал для студентов (просмотр и покупка курсов, прохождение уроков и тестов),
 // @description администраторов (управление курсами и модерация) и общедоступные эндпоинты (категории, публичная информация о курсах).
-// @host localhost:8081
-// @BasePath /api/v1
+// @host localhost:8090
+// @BasePath /api/v1/edu
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -81,8 +79,8 @@ func New() (*App, error) {
 
 	// Настройка Gin
 	gin.SetMode(os.Getenv("GIN_MODE"))
-	a.router = gin.Default()
-	a.router.Use(
+	a.httpServer = gin.Default()
+	a.httpServer.Use(
 		cors.New(corsConfig),
 		gin.Recovery(),
 		gin.Logger(),
@@ -113,21 +111,16 @@ func New() (*App, error) {
 
 	// Инициализация HTTP обработчиков
 	authRolesMiddleware := middleware.NewRolesMiddleware(a.grpcConn)
-	handler.NewCourseHandler(a.router, courseService, authRolesMiddleware)
-	handler.NewStudentHandler(a.router, courseService, paymentService, progressRepo, purchaseRepo, authRolesMiddleware)
-	handler.NewProgressHandler(a.router, courseService, progressRepo, authRolesMiddleware)
-	handler.NewProfileHandler(a.router, userService, authRolesMiddleware)
-	handler.NewAdminHandler(a.router, moderationService, authRolesMiddleware)
-	handler.NewCategoryHandler(a.router, categoryService)
+
+	handler.NewCourseHandler(a.httpServer, courseService, authRolesMiddleware)
+	handler.NewStudentHandler(a.httpServer, courseService, paymentService, progressRepo, purchaseRepo, authRolesMiddleware)
+	handler.NewProgressHandler(a.httpServer, courseService, progressRepo, authRolesMiddleware)
+	handler.NewProfileHandler(a.httpServer, userService, authRolesMiddleware)
+	handler.NewAdminHandler(a.httpServer, moderationService, authRolesMiddleware)
+	handler.NewCategoryHandler(a.httpServer, categoryService)
 
 	// Настройка Swagger
-	a.router.GET("/api/v1/edu/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// Настройка HTTP сервера
-	a.httpServer = &http.Server{
-		Addr:    ":" + a.cfg.Server.Port,
-		Handler: a.router,
-	}
+	a.httpServer.GET("/api/v1/edu/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return a, nil
 }
@@ -135,7 +128,7 @@ func New() (*App, error) {
 // Run запускает приложение
 func (a *App) Run() error {
 	fmt.Printf("Запуск HTTP сервера на порту %s\n", a.cfg.Server.Port)
-	if err := a.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	if err := a.httpServer.Run(":" + a.cfg.Server.Port); err != nil {
 		return fmt.Errorf("ошибка HTTP сервера: %w", err)
 	}
 	return nil
@@ -143,18 +136,9 @@ func (a *App) Run() error {
 
 // Stop останавливает приложение
 func (a *App) Stop(ctx context.Context) error {
-	var err error
-
-	// Закрываем HTTP сервер
-	if a.httpServer != nil {
-		if err = a.httpServer.Shutdown(ctx); err != nil {
-			return err
-		}
-	}
-
 	// Закрываем gRPC соединение
 	if a.grpcConn != nil {
-		if err = a.grpcConn.Close(); err != nil {
+		if err := a.grpcConn.Close(); err != nil {
 			return err
 		}
 	}

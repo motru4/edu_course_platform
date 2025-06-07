@@ -6,8 +6,8 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8081",
-    "basePath": "/api/v1",
+    "host": "localhost:8090",
+    "basePath": "/api/v1/edu",
     "paths": {
         "/admin/courses": {
             "post": {

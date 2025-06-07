@@ -31,7 +31,7 @@ func New() (*Config, error) {
 	// Auth configuration
 	cfg.Auth.GRPCAddress = os.Getenv("AUTH_GRPC_ADDRESS")
 	if cfg.Auth.GRPCAddress == "" {
-		cfg.Auth.GRPCAddress = "localhost:50051" // default address
+		cfg.Auth.GRPCAddress = "localhost:9090" // default address
 	}
 
 	return cfg, nil

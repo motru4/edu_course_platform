@@ -20,7 +20,7 @@ func NewAdminHandler(router *gin.Engine, moderationService *services.ModerationS
 		moderationService: moderationService,
 	}
 
-	admin := router.Group("/api/v1/admin")
+	admin := router.Group("/api/v1/edu/admin")
 	admin.Use(authMiddleware.RequireRoles("admin"))
 	{
 		admin.GET("/courses/pending", handler.ListPendingCourses)

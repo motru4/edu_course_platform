@@ -28,7 +28,7 @@ func NewProgressHandler(
 		progressRepo:  progressRepo,
 	}
 
-	progress := router.Group("/api/v1/progress")
+	progress := router.Group("/api/v1/edu/progress")
 	progress.Use(authMiddleware.RequireRoles("student"))
 	{
 		progress.GET("/courses/:courseId", handler.GetCourseProgress)

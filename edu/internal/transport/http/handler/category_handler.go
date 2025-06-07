@@ -16,7 +16,7 @@ func NewCategoryHandler(router *gin.Engine, categoryService *services.CategorySe
 		categoryService: categoryService,
 	}
 
-	categories := router.Group("/api/v1/categories")
+	categories := router.Group("/api/v1/edu/categories")
 	{
 		categories.GET("", handler.ListCategories)
 	}

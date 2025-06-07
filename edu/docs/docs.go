@@ -1152,8 +1152,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8081",
-	BasePath:         "/api/v1",
+	Host:             "localhost:8090",
+	BasePath:         "/api/v1/edu",
 	Schemes:          []string{},
 	Title:            "Образовательная платформа API",
 	Description:      "API для образовательной платформы с курсами, тестами и системой прогресса обучения\nВключает функционал для студентов (просмотр и покупка курсов, прохождение уроков и тестов),\nадминистраторов (управление курсами и модерация) и общедоступные эндпоинты (категории, публичная информация о курсах).",

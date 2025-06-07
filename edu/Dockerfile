@@ -27,7 +27,7 @@ COPY --from=builder /app/edu-service /app/edu-service
 COPY --from=builder /app/.env /app/.env
 
 # Открываем порты (HTTP и gRPC)
-EXPOSE 8081 9091
+EXPOSE 8081 9090
 
 # Запуск сервиса
 CMD ["./edu-service"] 

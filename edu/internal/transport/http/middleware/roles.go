@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -46,6 +47,7 @@ func (m *RolesMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
 		// Отправляем запрос
 		resp, err := m.authClient.CheckAccess(context.Background(), req)
 		if err != nil {
+			fmt.Println(err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "ошибка при проверке прав доступа"})
 			return
 		}

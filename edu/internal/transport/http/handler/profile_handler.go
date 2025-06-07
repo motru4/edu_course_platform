@@ -19,7 +19,7 @@ func NewProfileHandler(router *gin.Engine, userService *services.UserService, au
 		userService: userService,
 	}
 
-	profile := router.Group("/api/v1/profile")
+	profile := router.Group("/api/v1/edu/profile")
 	profile.Use(authMiddleware.RequireRoles("student", "admin"))
 	{
 		profile.GET("", handler.GetProfile)

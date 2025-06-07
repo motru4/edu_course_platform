@@ -19,7 +19,7 @@ func NewCourseHandler(router *gin.Engine, courseService *services.CourseService,
 		courseService: courseService,
 	}
 
-	courses := router.Group("/api/v1/courses")
+	courses := router.Group("/api/v1/edu/courses")
 	{
 		// Публичные эндпоинты
 		courses.GET("", handler.ListCourses)

@@ -33,7 +33,7 @@ func NewStudentHandler(
 		purchaseRepo:   purchaseRepo,
 	}
 
-	student := router.Group("/api/v1/student")
+	student := router.Group("/api/v1/edu/student")
 	{
 		// Публичные эндпоинты для курсов
 		student.GET("/courses/:courseId/lessons", handler.GetCourseLessons)

@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /api/v1/edu
 definitions:
   handler.PurchaseCourseRequest:
     properties:
@@ -190,7 +190,7 @@ definitions:
       total_xp:
         type: integer
     type: object
-host: localhost:8081
+host: localhost:8090
 info:
   contact: {}
   description: |-
